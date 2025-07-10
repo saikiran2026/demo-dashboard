@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { AlertTriangle, Shield, Activity, Clock, TrendingUp, Users, Server, Zap } from 'lucide-react'
 import { Alert, Log, Case, DashboardStats } from '@/types'
 import { format, subDays } from 'date-fns'
+import { useState, useEffect } from 'react'
 
 interface DashboardProps {
   stats: DashboardStats
@@ -21,6 +22,23 @@ const SEVERITY_COLORS = {
 }
 
 export function Dashboard({ stats, alerts, logs, cases }: DashboardProps) {
+  const [currentTime, setCurrentTime] = useState<string>('')
+
+  // Client-side time display to prevent hydration errors
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(format(new Date(), 'HH:mm:ss'))
+    }
+    
+    // Set initial time
+    updateTime()
+    
+    // Update every second
+    const interval = setInterval(updateTime, 1000)
+    
+    return () => clearInterval(interval)
+  }, [])
+
   // Prepare chart data
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const date = subDays(new Date(), 6 - i)
@@ -70,7 +88,7 @@ export function Dashboard({ stats, alerts, logs, cases }: DashboardProps) {
           </div>
           <div className="text-right">
             <p className="text-sm text-dark-text-secondary">Last Updated</p>
-            <p className="text-sm font-medium text-dark-text">{format(new Date(), 'HH:mm:ss')}</p>
+            <p className="text-sm font-medium text-dark-text">{currentTime || '--:--:--'}</p>
           </div>
         </div>
       </div>
