@@ -252,4 +252,4 @@ export const getAlerts = async () => {
 
 ## License
 
-This project is for demonstration purposes. Please ensure compliance with your organization's security policies before deploying in production environments. 
+This project is for demonstration purposes. Please ensure compliance with your organization's security policies before deploying in production environments. 🚀 SOC Dashboard deployed to GitHub Pages
