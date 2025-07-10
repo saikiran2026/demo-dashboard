@@ -110,21 +110,21 @@ export function CasesView({ cases }: CasesViewProps) {
 
           {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-text-secondary w-4 h-4" />
+            <div className="flex-1 relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 w-5 h-5 transition-colors pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search cases..."
+                placeholder="Search cases by title, description, assignee, or case ID..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
               />
             </div>
             
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {/* Status Filter */}
-              <div className="relative">
-                <label className="block text-xs text-dark-text-secondary mb-1">Status</label>
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Status</label>
                 <select
                   value=""
                   onChange={(e) => {
@@ -136,19 +136,19 @@ export function CasesView({ cases }: CasesViewProps) {
                       }))
                     }
                   }}
-                  className="min-w-[120px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
                 >
-                  <option value="">Add Status</option>
-                  <option value="open">Open</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="closed">Closed</option>
-                  <option value="escalated">Escalated</option>
+                  <option value="">Filter by status</option>
+                  <option value="open">📋 Open</option>
+                  <option value="in_progress">🔄 In Progress</option>
+                  <option value="closed">✅ Closed</option>
+                  <option value="escalated">🚨 Escalated</option>
                 </select>
               </div>
 
               {/* Severity Filter */}
-              <div className="relative">
-                <label className="block text-xs text-dark-text-secondary mb-1">Severity</label>
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Priority</label>
                 <select
                   value=""
                   onChange={(e) => {
@@ -160,19 +160,19 @@ export function CasesView({ cases }: CasesViewProps) {
                       }))
                     }
                   }}
-                  className="min-w-[120px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
                 >
-                  <option value="">Add Severity</option>
-                  <option value="critical">Critical</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  <option value="">Filter by priority</option>
+                  <option value="critical">🔴 Critical</option>
+                  <option value="high">🟠 High</option>
+                  <option value="medium">🟡 Medium</option>
+                  <option value="low">🟢 Low</option>
                 </select>
               </div>
 
               {/* Assignee Filter */}
-              <div className="relative">
-                <label className="block text-xs text-dark-text-secondary mb-1">Assignee</label>
+              <div className="min-w-[160px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Assignee</label>
                 <select
                   value=""
                   onChange={(e) => {
@@ -184,11 +184,11 @@ export function CasesView({ cases }: CasesViewProps) {
                       }))
                     }
                   }}
-                  className="min-w-[140px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
                 >
-                  <option value="">Add Assignee</option>
+                  <option value="">Filter by assignee</option>
                   {assignees.map(assignee => (
-                    <option key={assignee} value={assignee}>{assignee}</option>
+                    <option key={assignee} value={assignee}>👤 {assignee}</option>
                   ))}
                 </select>
               </div>

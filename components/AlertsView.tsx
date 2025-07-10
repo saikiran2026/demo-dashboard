@@ -106,52 +106,110 @@ export function AlertsView({ alerts, onAlertAction }: AlertsViewProps) {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex space-x-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-text-secondary w-4 h-4" />
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1 relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 w-5 h-5 transition-colors pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search alerts..."
+                placeholder="Search alerts by title, description, source, or IP address..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
               />
             </div>
             
-            {/* Severity Filter */}
-            <select
-              multiple
-              value={filters.severity}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                severity: Array.from(e.target.selectedOptions, option => option.value as AlertSeverity)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-              <option value="info">Info</option>
-            </select>
+            <div className="flex flex-wrap gap-3">
+              {/* Severity Filter */}
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Severity</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value as AlertSeverity
+                    if (value && !filters.severity.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        severity: [...prev.severity, value]
+                      }))
+                    }
+                  }}
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
+                >
+                  <option value="">Filter by severity</option>
+                  <option value="critical">🔴 Critical</option>
+                  <option value="high">🟠 High</option>
+                  <option value="medium">🟡 Medium</option>
+                  <option value="low">🟢 Low</option>
+                  <option value="info">🔵 Info</option>
+                </select>
+              </div>
 
-            {/* Status Filter */}
-            <select
-              multiple
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                status: Array.from(e.target.selectedOptions, option => option.value as AlertStatus)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="open">Open</option>
-              <option value="investigating">Investigating</option>
-              <option value="resolved">Resolved</option>
-              <option value="snoozed">Snoozed</option>
-              <option value="false_positive">False Positive</option>
-            </select>
+              {/* Status Filter */}
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Status</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value as AlertStatus
+                    if (value && !filters.status.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        status: [...prev.status, value]
+                      }))
+                    }
+                  }}
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
+                >
+                  <option value="">Filter by status</option>
+                  <option value="open">📋 Open</option>
+                  <option value="investigating">🔍 Investigating</option>
+                  <option value="resolved">✅ Resolved</option>
+                  <option value="snoozed">😴 Snoozed</option>
+                  <option value="false_positive">❌ False Positive</option>
+                </select>
+              </div>
+            </div>
           </div>
+
+          {/* Active Filters */}
+          {(filters.severity.length > 0 || filters.status.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {filters.severity.map(severity => (
+                <span key={severity} className="inline-flex items-center space-x-2 px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-sm font-medium border border-orange-500/30">
+                  <span>Severity: {severity}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      severity: prev.severity.filter(s => s !== severity)
+                    }))}
+                    className="text-orange-400 hover:text-orange-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {filters.status.map(status => (
+                <span key={status} className="inline-flex items-center space-x-2 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium border border-blue-500/30">
+                  <span>Status: {status.replace('_', ' ')}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      status: prev.status.filter(s => s !== status)
+                    }))}
+                    className="text-blue-400 hover:text-blue-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={() => setFilters({ search: '', severity: [], status: [], source: [] })}
+                className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium hover:bg-red-500/30 border border-red-500/30"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Alerts Table */}

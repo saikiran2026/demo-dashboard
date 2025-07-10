@@ -53,12 +53,37 @@ const logMessages = [
   'Rate limit exceeded'
 ];
 
+// Seeded random number generator for consistent server/client rendering
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: number) {
+    this.seed = seed;
+  }
+
+  next(): number {
+    this.seed = (this.seed * 9301 + 49297) % 233280;
+    return this.seed / 233280;
+  }
+}
+
+const rng = new SeededRandom(12345); // Fixed seed for consistency
+
 function randomChoice<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
+  return array[Math.floor(rng.next() * array.length)];
 }
 
 function randomDate(start: Date, end: Date): Date {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  return new Date(start.getTime() + rng.next() * (end.getTime() - start.getTime()));
+}
+
+function generateRandomString(length: number): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(rng.next() * chars.length)];
+  }
+  return result;
 }
 
 function generateAlert(id: string): Alert {
@@ -67,7 +92,7 @@ function generateAlert(id: string): Alert {
   const timestamp = randomDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date());
   
   const severityWeights = { critical: 90, high: 70, medium: 50, low: 30, info: 10 };
-  const riskScore = severityWeights[severity] + Math.floor(Math.random() * 10);
+  const riskScore = severityWeights[severity] + Math.floor(rng.next() * 10);
 
   return {
     id,
@@ -81,8 +106,8 @@ function generateAlert(id: string): Alert {
     timestamp,
     assignedTo: status !== 'open' ? randomChoice(analysts) : undefined,
     tags: [randomChoice(['malware', 'bruteforce', 'injection', 'ddos', 'phishing'])],
-    relatedLogs: [`log-${Math.floor(Math.random() * 1000)}`],
-    relatedCases: status === 'investigating' ? [`case-${Math.floor(Math.random() * 100)}`] : [],
+    relatedLogs: [`log-${Math.floor(rng.next() * 1000)}`],
+    relatedCases: status === 'investigating' ? [`case-${Math.floor(rng.next() * 100)}`] : [],
     snoozeUntil: status === 'snoozed' ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined,
     resolvedAt: status === 'resolved' ? randomDate(timestamp, new Date()) : undefined,
     resolvedBy: status === 'resolved' ? randomChoice(analysts) : undefined,
@@ -91,7 +116,7 @@ function generateAlert(id: string): Alert {
     riskScore,
     indicators: [
       { type: 'IP', value: randomChoice(sourceIPs) },
-      { type: 'Hash', value: `sha256:${Math.random().toString(36).substring(2, 15)}` }
+      { type: 'Hash', value: `sha256:${generateRandomString(13)}` }
     ],
     timeline: [
       {
@@ -119,12 +144,12 @@ function generateLog(id: string): Log {
       process: randomChoice(['auth-service', 'web-server', 'database', 'api-gateway']),
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       response_code: randomChoice([200, 401, 403, 404, 500]),
-      bytes_transferred: Math.floor(Math.random() * 10000)
+      bytes_transferred: Math.floor(rng.next() * 10000)
     },
-    relatedAlerts: Math.random() > 0.7 ? [`alert-${Math.floor(Math.random() * 500)}`] : [],
-    relatedCases: Math.random() > 0.9 ? [`case-${Math.floor(Math.random() * 100)}`] : [],
+    relatedAlerts: rng.next() > 0.7 ? [`alert-${Math.floor(rng.next() * 500)}`] : [],
+    relatedCases: rng.next() > 0.9 ? [`case-${Math.floor(rng.next() * 100)}`] : [],
     userId: randomChoice(users),
-    sessionId: `session-${Math.random().toString(36).substring(2, 15)}`,
+    sessionId: `session-${generateRandomString(13)}`,
     eventType: randomChoice(['authentication', 'authorization', 'data_access', 'system_event']),
     rawLog: `[${timestamp.toISOString()}] ${level.toUpperCase()}: ${randomChoice(logMessages)}`
   };
@@ -146,10 +171,10 @@ function generateCase(id: string): Case {
     createdAt,
     updatedAt: randomDate(createdAt, new Date()),
     closedAt: status === 'closed' ? randomDate(createdAt, new Date()) : undefined,
-    relatedAlerts: Array.from({ length: Math.floor(Math.random() * 5) + 1 }, 
-      () => `alert-${Math.floor(Math.random() * 500)}`),
-    relatedLogs: Array.from({ length: Math.floor(Math.random() * 10) + 1 }, 
-      () => `log-${Math.floor(Math.random() * 1000)}`),
+    relatedAlerts: Array.from({ length: Math.floor(rng.next() * 5) + 1 }, 
+      () => `alert-${Math.floor(rng.next() * 500)}`),
+    relatedLogs: Array.from({ length: Math.floor(rng.next() * 10) + 1 }, 
+      () => `log-${Math.floor(rng.next() * 1000)}`),
     tags: [randomChoice(['investigation', 'incident', 'breach', 'vulnerability'])],
     timeline: [
       {
@@ -159,10 +184,10 @@ function generateCase(id: string): Case {
         details: 'Initial investigation started'
       }
     ],
-    priority: Math.floor(Math.random() * 5) + 1,
+    priority: Math.floor(rng.next() * 5) + 1,
     category: randomChoice(['Security Incident', 'Policy Violation', 'Data Breach', 'System Compromise']),
-    estimatedHours: Math.floor(Math.random() * 40) + 8,
-    actualHours: status === 'closed' ? Math.floor(Math.random() * 50) + 5 : undefined
+    estimatedHours: Math.floor(rng.next() * 40) + 8,
+    actualHours: status === 'closed' ? Math.floor(rng.next() * 50) + 5 : undefined
   };
 }
 

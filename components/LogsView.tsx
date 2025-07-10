@@ -100,64 +100,139 @@ export function LogsView({ logs }: LogsViewProps) {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex space-x-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-text-secondary w-4 h-4" />
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1 relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 w-5 h-5 transition-colors pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search logs..."
+                placeholder="Search logs by message, source, event type, user ID, or IP address..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
               />
             </div>
             
-            {/* Level Filter */}
-            <select
-              multiple
-              value={filters.level}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                level: Array.from(e.target.selectedOptions, option => option.value as LogLevel)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="error">Error</option>
-              <option value="warn">Warning</option>
-              <option value="info">Info</option>
-              <option value="debug">Debug</option>
-            </select>
+            <div className="flex flex-wrap gap-3">
+              {/* Level Filter */}
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Log Level</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value as LogLevel
+                    if (value && !filters.level.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        level: [...prev.level, value]
+                      }))
+                    }
+                  }}
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
+                >
+                  <option value="">Filter by level</option>
+                  <option value="error">🔴 Error</option>
+                  <option value="warn">🟡 Warning</option>
+                  <option value="info">🔵 Info</option>
+                  <option value="debug">⚪ Debug</option>
+                </select>
+              </div>
 
-            {/* Time Range Filter */}
-            <select
-              value={filters.timeRange}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                timeRange: e.target.value as FilterState['timeRange']
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="last_hour">Last Hour</option>
-              <option value="last_24h">Last 24 Hours</option>
-              <option value="last_7d">Last 7 Days</option>
-              <option value="all">All Time</option>
-            </select>
+              {/* Time Range Filter */}
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Time Range</label>
+                <select
+                  value={filters.timeRange}
+                  onChange={(e) => setFilters(prev => ({ 
+                    ...prev, 
+                    timeRange: e.target.value as FilterState['timeRange']
+                  }))}
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
+                >
+                  <option value="last_hour">⏰ Last Hour</option>
+                  <option value="last_24h">📅 Last 24 Hours</option>
+                  <option value="last_7d">📊 Last 7 Days</option>
+                  <option value="all">🌐 All Time</option>
+                </select>
+              </div>
 
-            {/* Source Filter */}
-            <select
-              multiple
-              value={filters.source}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                source: Array.from(e.target.selectedOptions, option => option.value)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              {sources.map(source => (
-                <option key={source} value={source}>{source}</option>
-              ))}
-            </select>
+              {/* Source Filter */}
+              <div className="min-w-[140px]">
+                <label className="block text-xs font-medium text-gray-400 mb-2">Source</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value && !filters.source.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        source: [...prev.source, value]
+                      }))
+                    }
+                  }}
+                  className="w-full px-3 py-3 bg-dark-surface border-2 border-gray-600 rounded-xl text-dark-text focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 text-sm font-medium shadow-sm"
+                >
+                  <option value="">Filter by source</option>
+                  {sources.map(source => (
+                    <option key={source} value={source}>🖥️ {source}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
+
+          {/* Active Filters */}
+          {(filters.level.length > 0 || filters.source.length > 0 || filters.timeRange !== 'last_24h') && (
+            <div className="flex flex-wrap gap-2">
+              {filters.level.map(level => (
+                <span key={level} className="inline-flex items-center space-x-2 px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium border border-purple-500/30">
+                  <span>Level: {level}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      level: prev.level.filter(l => l !== level)
+                    }))}
+                    className="text-purple-400 hover:text-purple-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {filters.source.map(source => (
+                <span key={source} className="inline-flex items-center space-x-2 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium border border-green-500/30">
+                  <span>Source: {source}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      source: prev.source.filter(s => s !== source)
+                    }))}
+                    className="text-green-400 hover:text-green-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {filters.timeRange !== 'last_24h' && (
+                <span className="inline-flex items-center space-x-2 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium border border-blue-500/30">
+                  <span>Time: {filters.timeRange.replace('_', ' ')}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      timeRange: 'last_24h'
+                    }))}
+                    className="text-blue-400 hover:text-blue-300 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+              <button
+                onClick={() => setFilters({ search: '', level: [], source: [], timeRange: 'last_24h' })}
+                className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium hover:bg-red-500/30 border border-red-500/30"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Logs List */}
