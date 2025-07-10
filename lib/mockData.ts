@@ -1,5 +1,8 @@
 import { Alert, Log, Case, AlertSeverity, AlertStatus, LogLevel, CaseStatus } from '@/types';
 
+// Fixed base timestamp for consistent server/client rendering
+const BASE_TIMESTAMP = new Date('2024-01-15T10:00:00Z').getTime();
+
 const sources = [
   'Firewall', 'IDS/IPS', 'SIEM', 'Endpoint Protection', 'Web Application Firewall',
   'DNS Security', 'Email Security', 'Network Monitor', 'Database Security', 'Cloud Security'
@@ -89,7 +92,7 @@ function generateRandomString(length: number): string {
 function generateAlert(id: string): Alert {
   const severity = randomChoice(['critical', 'high', 'medium', 'low', 'info'] as AlertSeverity[]);
   const status = randomChoice(['open', 'investigating', 'resolved', 'snoozed', 'false_positive'] as AlertStatus[]);
-  const timestamp = randomDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date());
+  const timestamp = randomDate(new Date(BASE_TIMESTAMP - 7 * 24 * 60 * 60 * 1000), new Date(BASE_TIMESTAMP));
   
   const severityWeights = { critical: 90, high: 70, medium: 50, low: 30, info: 10 };
   const riskScore = severityWeights[severity] + Math.floor(rng.next() * 10);
@@ -108,8 +111,8 @@ function generateAlert(id: string): Alert {
     tags: [randomChoice(['malware', 'bruteforce', 'injection', 'ddos', 'phishing'])],
     relatedLogs: [`log-${Math.floor(rng.next() * 1000)}`],
     relatedCases: status === 'investigating' ? [`case-${Math.floor(rng.next() * 100)}`] : [],
-    snoozeUntil: status === 'snoozed' ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined,
-    resolvedAt: status === 'resolved' ? randomDate(timestamp, new Date()) : undefined,
+    snoozeUntil: status === 'snoozed' ? new Date(BASE_TIMESTAMP + 24 * 60 * 60 * 1000) : undefined,
+    resolvedAt: status === 'resolved' ? randomDate(timestamp, new Date(BASE_TIMESTAMP)) : undefined,
     resolvedBy: status === 'resolved' ? randomChoice(analysts) : undefined,
     falsePositiveReason: status === 'false_positive' ? 'Authorized maintenance activity' : undefined,
     category: randomChoice(['network', 'endpoint', 'application', 'identity', 'data']),
@@ -131,7 +134,7 @@ function generateAlert(id: string): Alert {
 
 function generateLog(id: string): Log {
   const level = randomChoice(['error', 'warn', 'info', 'debug'] as LogLevel[]);
-  const timestamp = randomDate(new Date(Date.now() - 24 * 60 * 60 * 1000), new Date());
+  const timestamp = randomDate(new Date(BASE_TIMESTAMP - 24 * 60 * 60 * 1000), new Date(BASE_TIMESTAMP));
   
   return {
     id,
@@ -158,7 +161,7 @@ function generateLog(id: string): Log {
 function generateCase(id: string): Case {
   const status = randomChoice(['open', 'in_progress', 'closed', 'escalated'] as CaseStatus[]);
   const severity = randomChoice(['critical', 'high', 'medium', 'low'] as AlertSeverity[]);
-  const createdAt = randomDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date());
+  const createdAt = randomDate(new Date(BASE_TIMESTAMP - 30 * 24 * 60 * 60 * 1000), new Date(BASE_TIMESTAMP));
   
   return {
     id,
@@ -169,8 +172,8 @@ function generateCase(id: string): Case {
     assignedTo: randomChoice(analysts),
     createdBy: randomChoice(analysts),
     createdAt,
-    updatedAt: randomDate(createdAt, new Date()),
-    closedAt: status === 'closed' ? randomDate(createdAt, new Date()) : undefined,
+    updatedAt: randomDate(createdAt, new Date(BASE_TIMESTAMP)),
+    closedAt: status === 'closed' ? randomDate(createdAt, new Date(BASE_TIMESTAMP)) : undefined,
     relatedAlerts: Array.from({ length: Math.floor(rng.next() * 5) + 1 }, 
       () => `alert-${Math.floor(rng.next() * 500)}`),
     relatedLogs: Array.from({ length: Math.floor(rng.next() * 10) + 1 }, 
@@ -196,7 +199,9 @@ export const mockAlerts: Alert[] = Array.from({ length: 500 }, (_, i) => generat
 export const mockLogs: Log[] = Array.from({ length: 2000 }, (_, i) => generateLog(`log-${i + 1}`));
 export const mockCases: Case[] = Array.from({ length: 150 }, (_, i) => generateCase(`case-${i + 1}`));
 
-// Generate dashboard stats
+// Generate dashboard stats using fixed timestamp
+const last24Hours = new Date(BASE_TIMESTAMP - 24 * 60 * 60 * 1000);
+
 export const mockStats = {
   alerts: {
     total: mockAlerts.length,
@@ -206,7 +211,7 @@ export const mockStats = {
     medium: mockAlerts.filter(a => a.severity === 'medium').length,
     low: mockAlerts.filter(a => a.severity === 'low').length,
     resolved24h: mockAlerts.filter(a => 
-      a.resolvedAt && a.resolvedAt > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      a.resolvedAt && a.resolvedAt > last24Hours
     ).length
   },
   cases: {
@@ -214,13 +219,13 @@ export const mockStats = {
     open: mockCases.filter(c => c.status === 'open').length,
     inProgress: mockCases.filter(c => c.status === 'in_progress').length,
     closed24h: mockCases.filter(c => 
-      c.closedAt && c.closedAt > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      c.closedAt && c.closedAt > last24Hours
     ).length,
     avgResolutionTime: 24.5
   },
   logs: {
     total24h: mockLogs.filter(l => 
-      l.timestamp > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      l.timestamp > last24Hours
     ).length,
     errors: mockLogs.filter(l => l.level === 'error').length,
     warnings: mockLogs.filter(l => l.level === 'warn').length,

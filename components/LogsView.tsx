@@ -6,6 +6,9 @@ import { format } from 'date-fns'
 import { Log, LogLevel } from '@/types'
 import { clsx } from 'clsx'
 
+// Fixed base timestamp for consistent server/client rendering (same as mockData)
+const BASE_TIMESTAMP = new Date('2024-01-15T10:00:00Z').getTime();
+
 interface LogsViewProps {
   logs: Log[]
 }
@@ -31,7 +34,8 @@ export function LogsView({ logs }: LogsViewProps) {
   }, [logs])
 
   const filteredLogs = useMemo(() => {
-    const now = new Date()
+    // Use fixed timestamp for consistent filtering
+    const now = new Date(BASE_TIMESTAMP)
     const timeFilters = {
       last_hour: new Date(now.getTime() - 60 * 60 * 1000),
       last_24h: new Date(now.getTime() - 24 * 60 * 60 * 1000),
