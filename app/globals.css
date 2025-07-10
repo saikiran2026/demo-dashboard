@@ -8,7 +8,10 @@
   }
   
   body {
-    @apply bg-dark-bg text-dark-text antialiased;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   * {
@@ -37,14 +40,17 @@
 
 @layer components {
   .status-indicator {
-    @apply w-2 h-2 rounded-full animate-pulse-slow;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  .status-critical { @apply bg-status-critical; }
-  .status-high { @apply bg-status-high; }
-  .status-medium { @apply bg-status-medium; }
-  .status-low { @apply bg-status-low; }
-  .status-info { @apply bg-status-info; }
+  .status-critical { background-color: #ef4444; }
+  .status-high { background-color: #f97316; }
+  .status-medium { background-color: #eab308; }
+  .status-low { background-color: #22c55e; }
+  .status-info { background-color: #3b82f6; }
 }
 
  

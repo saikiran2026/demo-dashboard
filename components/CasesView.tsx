@@ -109,7 +109,7 @@ export function CasesView({ cases }: CasesViewProps) {
           </div>
 
           {/* Search and Filters */}
-          <div className="flex space-x-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-text-secondary w-4 h-4" />
               <input
@@ -121,53 +121,133 @@ export function CasesView({ cases }: CasesViewProps) {
               />
             </div>
             
-            {/* Status Filter */}
-            <select
-              multiple
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                status: Array.from(e.target.selectedOptions, option => option.value as CaseStatus)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="closed">Closed</option>
-              <option value="escalated">Escalated</option>
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {/* Status Filter */}
+              <div className="relative">
+                <label className="block text-xs text-dark-text-secondary mb-1">Status</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value as CaseStatus
+                    if (value && !filters.status.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        status: [...prev.status, value]
+                      }))
+                    }
+                  }}
+                  className="min-w-[120px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Add Status</option>
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="closed">Closed</option>
+                  <option value="escalated">Escalated</option>
+                </select>
+              </div>
 
-            {/* Severity Filter */}
-            <select
-              multiple
-              value={filters.severity}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                severity: Array.from(e.target.selectedOptions, option => option.value as AlertSeverity)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
+              {/* Severity Filter */}
+              <div className="relative">
+                <label className="block text-xs text-dark-text-secondary mb-1">Severity</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value as AlertSeverity
+                    if (value && !filters.severity.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        severity: [...prev.severity, value]
+                      }))
+                    }
+                  }}
+                  className="min-w-[120px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Add Severity</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
 
-            {/* Assignee Filter */}
-            <select
-              multiple
-              value={filters.assignedTo}
-              onChange={(e) => setFilters(prev => ({ 
-                ...prev, 
-                assignedTo: Array.from(e.target.selectedOptions, option => option.value)
-              }))}
-              className="px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
-            >
-              {assignees.map(assignee => (
-                <option key={assignee} value={assignee}>{assignee}</option>
-              ))}
-            </select>
+              {/* Assignee Filter */}
+              <div className="relative">
+                <label className="block text-xs text-dark-text-secondary mb-1">Assignee</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value && !filters.assignedTo.includes(value)) {
+                      setFilters(prev => ({ 
+                        ...prev, 
+                        assignedTo: [...prev.assignedTo, value]
+                      }))
+                    }
+                  }}
+                  className="min-w-[140px] px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Add Assignee</option>
+                  {assignees.map(assignee => (
+                    <option key={assignee} value={assignee}>{assignee}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
+
+          {/* Active Filters */}
+          {(filters.status.length > 0 || filters.severity.length > 0 || filters.assignedTo.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {filters.status.map(status => (
+                <span key={status} className="inline-flex items-center space-x-1 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+                  <span>Status: {status.replace('_', ' ')}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      status: prev.status.filter(s => s !== status)
+                    }))}
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {filters.severity.map(severity => (
+                <span key={severity} className="inline-flex items-center space-x-1 px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-sm">
+                  <span>Severity: {severity}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      severity: prev.severity.filter(s => s !== severity)
+                    }))}
+                    className="text-orange-400 hover:text-orange-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {filters.assignedTo.map(assignee => (
+                <span key={assignee} className="inline-flex items-center space-x-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                  <span>Assignee: {assignee}</span>
+                  <button 
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      assignedTo: prev.assignedTo.filter(a => a !== assignee)
+                    }))}
+                    className="text-green-400 hover:text-green-300"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={() => setFilters({ search: '', status: [], severity: [], assignedTo: [] })}
+                className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm hover:bg-red-500/30"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Cases Grid */}
