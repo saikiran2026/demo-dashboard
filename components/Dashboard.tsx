@@ -6,6 +6,9 @@ import { Alert, Log, Case, DashboardStats } from '@/types'
 import { format, subDays } from 'date-fns'
 import { useState, useEffect } from 'react'
 
+// Fixed base timestamp for consistent data display (same as mockData)
+const BASE_TIMESTAMP = new Date('2024-01-15T10:00:00Z').getTime();
+
 interface DashboardProps {
   stats: DashboardStats
   alerts: Alert[]
@@ -39,9 +42,9 @@ export function Dashboard({ stats, alerts, logs, cases }: DashboardProps) {
     return () => clearInterval(interval)
   }, [])
 
-  // Prepare chart data
+  // Prepare chart data using fixed base timestamp
   const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = subDays(new Date(), 6 - i)
+    const date = subDays(new Date(BASE_TIMESTAMP), 6 - i)
     const dayAlerts = alerts.filter(alert => 
       alert.timestamp.toDateString() === date.toDateString()
     )
