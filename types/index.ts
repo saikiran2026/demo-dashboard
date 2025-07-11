@@ -57,7 +57,7 @@ export interface Case {
   description: string;
   status: CaseStatus;
   severity: AlertSeverity;
-  assignedTo: string;
+  assignedTo?: string;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

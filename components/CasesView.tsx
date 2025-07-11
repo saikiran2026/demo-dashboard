@@ -3,11 +3,13 @@
 import { useState, useMemo } from 'react'
 import { Search, Filter, Briefcase, Clock, User, Calendar, FileText, AlertTriangle } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
-import { Case, CaseStatus, AlertSeverity } from '@/types'
+import { Case, CaseStatus, AlertSeverity, Alert, Log } from '@/types'
 import { clsx } from 'clsx'
 
 interface CasesViewProps {
   cases: Case[]
+  alerts?: Alert[]
+  logs?: Log[]
 }
 
 interface FilterState {
@@ -17,7 +19,7 @@ interface FilterState {
   assignedTo: string[]
 }
 
-export function CasesView({ cases }: CasesViewProps) {
+export function CasesView({ cases, alerts = [], logs = [] }: CasesViewProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: [],
@@ -433,11 +435,42 @@ export function CasesView({ cases }: CasesViewProps) {
                 <div>
                   <p className="text-xs text-dark-text-secondary mb-1">Alerts ({selectedCase.relatedAlerts.length})</p>
                   <div className="space-y-1">
-                    {selectedCase.relatedAlerts.slice(0, 3).map((alertId) => (
-                      <div key={alertId} className="bg-red-500/10 border border-red-500/20 p-2 rounded text-xs">
-                        <span className="text-red-400 font-mono">{alertId}</span>
-                      </div>
-                    ))}
+                    {selectedCase.relatedAlerts.slice(0, 3).map((alertId) => {
+                      const alert = alerts.find(a => a.id === alertId);
+                      if (!alert) {
+                        return (
+                          <div key={alertId} className="bg-red-500/10 border border-red-500/20 p-2 rounded text-xs">
+                            <span className="text-red-400 font-mono">{alertId}</span>
+                          </div>
+                        );
+                      }
+                      
+                      const getSeverityColor = (severity: AlertSeverity) => {
+                        switch (severity) {
+                          case 'critical': return 'text-red-400 bg-red-500/20'
+                          case 'high': return 'text-orange-400 bg-orange-500/20'
+                          case 'medium': return 'text-yellow-400 bg-yellow-500/20'
+                          case 'low': return 'text-green-400 bg-green-500/20'
+                          case 'info': return 'text-blue-400 bg-blue-500/20'
+                        }
+                      };
+                      
+                      return (
+                        <div key={alertId} className="bg-red-500/10 border border-red-500/20 p-3 rounded text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-red-400 font-semibold">{alert.title}</span>
+                            <span className={clsx('px-1 py-0.5 rounded text-xs', getSeverityColor(alert.severity))}>
+                              {alert.severity.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-dark-text-secondary text-xs mb-1 line-clamp-2">{alert.description}</p>
+                          <div className="flex justify-between text-xs text-dark-text-secondary">
+                            <span>{alert.source}</span>
+                            <span>{format(alert.timestamp, 'MMM dd, HH:mm')}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                     {selectedCase.relatedAlerts.length > 3 && (
                       <p className="text-xs text-dark-text-secondary">
                         +{selectedCase.relatedAlerts.length - 3} more alerts
@@ -449,11 +482,44 @@ export function CasesView({ cases }: CasesViewProps) {
                 <div>
                   <p className="text-xs text-dark-text-secondary mb-1">Logs ({selectedCase.relatedLogs.length})</p>
                   <div className="space-y-1">
-                    {selectedCase.relatedLogs.slice(0, 3).map((logId) => (
-                      <div key={logId} className="bg-blue-500/10 border border-blue-500/20 p-2 rounded text-xs">
-                        <span className="text-blue-400 font-mono">{logId}</span>
-                      </div>
-                    ))}
+                    {selectedCase.relatedLogs.slice(0, 3).map((logId) => {
+                      const log = logs.find(l => l.id === logId);
+                      if (!log) {
+                        return (
+                          <div key={logId} className="bg-blue-500/10 border border-blue-500/20 p-2 rounded text-xs">
+                            <span className="text-blue-400 font-mono">{logId}</span>
+                          </div>
+                        );
+                      }
+                      
+                      const getLevelColor = (level: string) => {
+                        switch (level) {
+                          case 'error': return 'text-red-400 bg-red-500/20'
+                          case 'warn': return 'text-yellow-400 bg-yellow-500/20'
+                          case 'info': return 'text-blue-400 bg-blue-500/20'
+                          case 'debug': return 'text-gray-400 bg-gray-500/20'
+                          default: return 'text-gray-400 bg-gray-500/20'
+                        }
+                      };
+                      
+                      return (
+                        <div key={logId} className="bg-blue-500/10 border border-blue-500/20 p-3 rounded text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-blue-400 font-semibold">{log.message}</span>
+                            <span className={clsx('px-1 py-0.5 rounded text-xs', getLevelColor(log.level))}>
+                              {log.level.toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-dark-text-secondary">
+                            <span>{log.source}</span>
+                            <span>{format(log.timestamp, 'MMM dd, HH:mm:ss')}</span>
+                          </div>
+                          {log.sourceIp && (
+                            <p className="text-xs text-dark-text-secondary mt-1">IP: {log.sourceIp}</p>
+                          )}
+                        </div>
+                      );
+                    })}
                     {selectedCase.relatedLogs.length > 3 && (
                       <p className="text-xs text-dark-text-secondary">
                         +{selectedCase.relatedLogs.length - 3} more logs

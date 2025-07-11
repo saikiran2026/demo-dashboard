@@ -98,7 +98,7 @@ export default function HomePage() {
         case 'logs':
           return <LogsView logs={logs} />
         case 'cases':
-          return <CasesView cases={cases} />
+          return <CasesView cases={cases} alerts={alerts} logs={logs} />
         default:
           return <Dashboard stats={stats} alerts={alerts} logs={logs} cases={cases} />
       }
