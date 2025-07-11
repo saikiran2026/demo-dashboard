@@ -31,7 +31,7 @@ export function CasesView({ cases, alerts = [], logs = [] }: CasesViewProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const assignees = useMemo(() => {
-    return Array.from(new Set(cases.map(case_ => case_.assignedTo)))
+    return Array.from(new Set(cases.map(case_ => case_.assignedTo).filter(Boolean)))
   }, [cases])
 
   const filteredCases = useMemo(() => {
@@ -47,7 +47,7 @@ export function CasesView({ cases, alerts = [], logs = [] }: CasesViewProps) {
         if (filters.severity.length > 0 && !filters.severity.includes(case_.severity)) {
           return false
         }
-        if (filters.assignedTo.length > 0 && !filters.assignedTo.includes(case_.assignedTo)) {
+        if (filters.assignedTo.length > 0 && case_.assignedTo && !filters.assignedTo.includes(case_.assignedTo)) {
           return false
         }
         return true
